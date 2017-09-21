@@ -140,8 +140,8 @@ vector<double> getXY(double s, double d,
 	}
 
 	int wp2 = (prev_wp+1)%maps_x.size();
-
 	double heading = atan2((maps_y[wp2]-maps_y[prev_wp]),(maps_x[wp2]-maps_x[prev_wp]));
+
 	// The x,y,s along the segment
 	double seg_s = (s-maps_s[prev_wp]);
 	double seg_x = maps_x[prev_wp]+seg_s*cos(heading);
@@ -219,37 +219,57 @@ int main() {
           // j[1] is the data JSON object
           
         	// Main car's localization Data
-          	double car_x = j[1]["x"];
-          	double car_y = j[1]["y"];
-          	double car_s = j[1]["s"];
-          	double car_d = j[1]["d"];
-          	double car_yaw = j[1]["yaw"];
-          	double car_speed = j[1]["speed"];
+          double car_x = j[1]["x"];
+          double car_y = j[1]["y"];
+          double car_s = j[1]["s"];
+          double car_d = j[1]["d"];
+          double car_yaw = j[1]["yaw"];
+          double car_speed = j[1]["speed"];
 
-          	// Previous path data given to the Planner
-          	auto previous_path_x = j[1]["previous_path_x"];
-          	auto previous_path_y = j[1]["previous_path_y"];
-          	// Previous path's end s and d values 
-          	double end_path_s = j[1]["end_path_s"];
-          	double end_path_d = j[1]["end_path_d"];
+          // Previous path data given to the Planner
+          auto previous_path_x = j[1]["previous_path_x"];
+          auto previous_path_y = j[1]["previous_path_y"];
+          // Previous path's end s and d values
+          double end_path_s = j[1]["end_path_s"];
+          double end_path_d = j[1]["end_path_d"];
 
-          	// Sensor Fusion Data, a list of all other cars on the same side of the road.
-          	auto sensor_fusion = j[1]["sensor_fusion"];
+          // Sensor Fusion Data, a list of all other cars on the same side of the road.
+          auto sensor_fusion = j[1]["sensor_fusion"];
+          json msgJson;
 
-          	json msgJson;
+          vector<double> next_x_vals;
+          vector<double> next_y_vals;
 
-          	vector<double> next_x_vals;
-          	vector<double> next_y_vals;
+          // TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+          // We will set the points 0.5 m apart.
+          // Since the car moves 50 times a second,
+          // a distance of 0.5m per move will create a velocity of 25 m/s.
+          // 25 m/s is close to 50 MPH.
+          // P.S.: 1 lane = 4 meters wide
 
-          	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
-          	msgJson["next_x"] = next_x_vals;
-          	msgJson["next_y"] = next_y_vals;
+          double dist_inc = 0.5;
+          for(int i = 0; i < 50; i++) {
+            double next_s = car_s + (i + 1) * dist_inc;
+            double next_d = 6;
 
-          	auto msg = "42[\"control\","+ msgJson.dump()+"]";
+            vector<double> xy = getXY(next_s, next_d,
+                                      map_waypoints_s,
+                                      map_waypoints_x,
+                                      map_waypoints_y);
+            next_x_vals.push_back(xy[0]);
+            next_y_vals.push_back(xy[1]);
+          }
 
-          	//this_thread::sleep_for(chrono::milliseconds(1000));
-          	ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-          
+          // END
+
+          msgJson["next_x"] = next_x_vals;
+          msgJson["next_y"] = next_y_vals;
+
+          auto msg = "42[\"control\","+ msgJson.dump()+"]";
+
+          //this_thread::sleep_for(chrono::milliseconds(1000));
+          ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+
         }
       }
       else {

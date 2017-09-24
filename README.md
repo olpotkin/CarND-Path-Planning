@@ -1,7 +1,7 @@
 # CarND-Path-Planning-Project
    
-### Simulator.
-You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
+### Simulator
+You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab](https://github.com/udacity/self-driving-car-sim/releases).
 
 ### Goals
 In this project the goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. The car's localization and sensor fusion data, a sparse map list of waypoints around the highway were provided. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the **6946m** highway. Since the car is trying to go **50 MPH**, it should take **a little over 5 minutes** to complete 1 loop. Also the car should **not experience total acceleration over 10 m/s^2 and jerk that is greater than 50 m/s^3**.
@@ -9,7 +9,14 @@ In this project the goal is to safely navigate around a virtual highway with oth
 #### The map of the highway is in data/highway_map.txt
 Each waypoint in the list contains ```[x, y, s, dx, dy]``` values. ```x``` and ```y``` are the waypoint's map coordinate position, the ```s``` value is the distance along the road to get to that waypoint in meters, the ```dx``` and ```dy``` values define the unit normal vector pointing outward of the highway loop.
 
+The track contains a total of 181 waypoints, with the last waypoint mapping back around to the first. The waypoints are in the middle of the double-yellow diving line in the center of the highway.
+
 The highway's waypoints loop around so the frenet ```s``` value, distance along the road, goes from 0 to 6945.554.
+
+The track is 6945.554 meters around (about 4.32 miles). If the car averages near 50 MPH, then it should take a little more than 5 minutes for it to go all the way around the highway.
+
+The highway has 6 lanes total - 3 heading in each direction. Each lane is 4 m wide and the car should only ever be in one of the 3 lanes on the right-hand side.
+
 
 ## Basic Build Instructions
 

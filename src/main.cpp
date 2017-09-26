@@ -200,7 +200,7 @@ int main() {
   int lane = 1;
 
   // Have a reference velocity to target
-  double ref_vel = 49.5;
+  double ref_vel = 0.0;
   // ===========
 
 
@@ -269,13 +269,20 @@ int main() {
               double check_car_s = sensor_fusion[i][5];
 
               check_car_s += ((double)prev_size * 0.02 * check_speed);
-              // check s values greater than mine and s gap
+              // Check s values greater than mine and s gap
               if ((check_car_s > car_s) && ((check_car_s-car_s) < 30)) {
                 // TODO: some logic here
-                ref_vel = 29.5;     // mph
-                //too_close = true;
+                //ref_vel = 29.5;     // mph
+                too_close = true;
               }
             }
+          }
+
+          if (too_close) {
+            ref_vel -= 0.224;           // -= ~5m/s*s
+          }
+          else if (ref_vel < 49.5) {
+            ref_vel += 0.224;           // += ~5m/s*s
           }
 
 

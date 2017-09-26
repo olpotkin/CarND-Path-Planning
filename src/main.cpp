@@ -258,31 +258,15 @@ int main() {
           // 25 m/s is close to 50 MPH.
           // P.S.: 1 lane = 4 meters wide
 
-          /*
-          double dist_inc = 0.4;
-          for(int i = 0; i < 50; i++) {
-            double next_s = car_s + (i + 1) * dist_inc;
-            double next_d = 6;
-
-            vector<double> xy = getXY(next_s, next_d,
-                                      map_waypoints_s,
-                                      map_waypoints_x,
-                                      map_waypoints_y);
-            next_x_vals.push_back(xy[0]);
-            next_y_vals.push_back(xy[1]);
-          }
-          */
-          // END
-
-
-          // ===========
           // Create a list of widely spaced (x, y) waypoints, evenly spaced at 30 m.
-          // Later we will interpolate these waypoints with a spline and fill it in with more points
+          // Later we will interpolate these waypoints with a spline
+          // and fill it in with more points that control speed
           vector<double> ptsx;
           vector<double> ptsy;
 
-          // Reference x, y, yaw states
-          // Either we will reference the starting point as where the car is or at the previous paths and point
+          // Reference x, y, yaw states.
+          // Either we will reference the starting point as where the car is
+          // or at the previous paths and point
           double ref_x = car_x;
           double ref_y = car_y;
           double ref_yaw = deg2rad(car_yaw);

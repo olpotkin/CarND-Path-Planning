@@ -62,6 +62,7 @@ int ClosestWaypoint(double x, double y,
   return closestWaypoint;
 }
 
+
 int NextWaypoint(double x, double y, double theta,
                  const vector<double> &maps_x,
                  const vector<double> &maps_y) {
@@ -155,6 +156,13 @@ vector<double> getXY(double s, double d,
 }
 
 
+// Get the Lane number based on Frenet coordinates
+int getLaneFrenet(double d) {
+  int lane_width = 4;
+  return int(floor(d / lane_width));
+}
+
+
 int main() {
   uWS::Hub h;
 
@@ -193,13 +201,11 @@ int main() {
   	map_waypoints_dy.push_back(d_y);
   }
 
-  // ===========
   // Start in lane 1
   int lane = 1;
-
   // Have a reference velocity to target
-  double ref_vel = 0.0;
-  // ===========
+  double ref_vel = 0.0;           // mph
+  double max_vel = 49.5;          // mph
 
 
   h.onMessage([&ref_vel,
@@ -260,7 +266,7 @@ int main() {
           for (int i = 0; i < sensor_fusion.size(); ++i) {
             // Car is in ego's lane
             float d = sensor_fusion[i][6];
-            if (d < (2+4*lane+2) && d > (2+4*lane-2)) {
+            if (d < (2 + 4*lane + 2) && d > (2 + 4*lane - 2)) {
               double vx = sensor_fusion[i][3];
               double vy = sensor_fusion[i][4];
               double check_speed = sqrt(vx*vx + vy*vy);
@@ -271,11 +277,31 @@ int main() {
               if ((check_car_s > car_s) && ((check_car_s-car_s) < 30)) {
                 // TODO: some logic here
 
-                //ref_vel = 29.5;       // mph
                 too_close = true;
 
-                if (lane > 0) {
+                // Left
+                if (lane == 0) {
+                  // Check Right Lane
+                  // - move to Right Lane
+                  // - keep Lane
+                  lane = 1;
+
+                }
+                // Middle
+                else if (lane == 1) {
+                  // Check Left Lane and Right Lane and decide
+                  // what is better:
+                  // - move to Left Lane
+                  // - move to Right Lane
+                  // - keep Lane
                   lane = 0;
+
+                }
+                // Right
+                else if (lane == 2) {
+                  // - move to Left Lane
+                  // - keep Lane
+                  lane = 1;
                 }
 
               }
@@ -285,7 +311,7 @@ int main() {
           if (too_close) {
             ref_vel -= 0.224;           // -= ~5m/s*s
           }
-          else if (ref_vel < 49.5) {
+          else if (ref_vel < max_vel) {
             ref_vel += 0.224;           // += ~5m/s*s
           }
 

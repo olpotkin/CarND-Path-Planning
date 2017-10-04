@@ -209,6 +209,7 @@ int main() {
 
 
   h.onMessage([&ref_vel,
+               &max_vel,
                &map_waypoints_x,
                &map_waypoints_y,
                &map_waypoints_s,
@@ -253,12 +254,19 @@ int main() {
 
           int prev_size = previous_path_x.size();
 
-          // ===================
           // Check cars near ego
-          // ===================
           if (prev_size > 0) {
             car_s = end_path_s;
           }
+
+
+
+
+
+
+
+
+
 
           bool too_close = false;
 

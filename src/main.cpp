@@ -270,8 +270,14 @@ int main() {
               // Check s values greater than mine and s gap
               if ((check_car_s > car_s) && ((check_car_s-car_s) < 30)) {
                 // TODO: some logic here
-                //ref_vel = 29.5;     // mph
+
+                //ref_vel = 29.5;       // mph
                 too_close = true;
+
+                if (lane > 0) {
+                  lane = 0;
+                }
+
               }
             }
           }

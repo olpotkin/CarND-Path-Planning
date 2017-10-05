@@ -282,11 +282,23 @@ int main() {
             }
           }
 
-
-
-
+          // Averaging speed data for each lane
+          for (int i = 0; i < lane_speeds.size(); ++i) {
+            int num_vehicles = lane_count[i];         // Num of vehicles in the i-th lane
+            // If no vehicles in the lane - we could drive with max allowed speed there
+            if (num_vehicles == 0) {
+              lane_speeds[i] = max_vel;
+            }
+            // Else - average the speed in the lane
+            else {
+              lane_speeds[i] = lane_speeds[i] / num_vehicles;
+            }
+          }
 
           bool too_close = false;
+
+
+
 /*
           // Find ref_v to use
           for (int i = 0; i < sensor_fusion.size(); ++i) {

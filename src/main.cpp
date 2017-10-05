@@ -259,6 +259,7 @@ int main() {
             car_s = end_path_s;
           }
 
+
           // Speeds in each Lanes
           vector<double> lane_speeds = {0.0, 0.0, 0.0};
           vector<int> lane_count     = {0, 0, 0};
@@ -295,8 +296,37 @@ int main() {
             }
           }
 
-          bool too_close = false;
 
+          bool too_close = false;
+          double closest_veh_speed = max_vel;
+
+          // Find ref_v to use
+          for (int i = 0; i < sensor_fusion.size(); ++i) {
+            float some_d = sensor_fusion[i][6];
+
+            // Check if the vehicle is in ego's lane
+            int some_lane = getLaneFrenet(some_d);
+            if (some_lane < 0 || some_lane > 2) {
+              continue;
+            }
+            int car_lane = getLaneFrenet(end_path_d);
+
+            if (lane == some_lane) {
+              double vx = sensor_fusion[i][3];
+              double vy = sensor_fusion[i][4];
+              double check_speed = sqrt(vx*vx + vy*vy);
+              double check_car_s = sensor_fusion[i][5];
+
+              check_car_s += ((double)prev_size * 0.02 * check_speed);
+              // Check 's' values greater (it's ahead) and less than 30
+              if (check_car_s > car_s && check_car_s - car_s < 30)
+              { // What the speed?
+                // - turn left or turn right
+                too_close = true;
+                closest_veh_speed = check_speed;
+              }
+            }
+          }
 
 
 /*

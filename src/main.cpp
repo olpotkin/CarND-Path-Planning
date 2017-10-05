@@ -328,6 +328,32 @@ int main() {
             }
           }
 
+          // Lane changing decision process
+          if (too_close) {
+            vector<int> lane_cases;
+            if (lane == 0) {                // If Left Lane
+              // - keep lane
+              // - turn right
+              lane_cases = {0, 1};
+            }
+            else if (lane == 1) {           // If Middle Lane
+              // - turn left
+              // - keep lane
+              // - turn right
+              lane_cases = {0, 1, 2};
+            }
+            else {                          // If Right Lane
+              // - turn left
+              // - keep lane
+              lane_cases = {1, 2};
+            }
+
+            int best_lane = lane;
+            int best_cost = numeric_limits<double>::max();
+
+
+          }
+
 
 /*
           // Find ref_v to use

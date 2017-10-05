@@ -259,17 +259,35 @@ int main() {
             car_s = end_path_s;
           }
 
+          // Speeds in each Lanes
+          vector<double> lane_speeds = {0.0, 0.0, 0.0};
+          vector<int> lane_count     = {0, 0, 0};
 
+          // Collect data from all Lanes
+          for (int i = 0; i < sensor_fusion.size(); ++i) {
+            float some_d = sensor_fusion[i][6];
+            int some_lane = getLaneFrenet(some_d);
 
-
-
+            // Check for unbounded data
+            if (some_lane < 0 || some_lane > 2) {
+              continue;
+            } // Got lane 0 or 1 or 2
+            else if (some_lane >= 0 && some_lane <= 2) {
+              double vx = sensor_fusion[i][3];
+              double vy = sensor_fusion[i][4];
+              double check_speed = sqrt(vx*vx + vy*vy);
+              // Convert to mph
+              lane_speeds[some_lane] += check_speed * 2.24;
+              lane_count[some_lane] += 1;
+            }
+          }
 
 
 
 
 
           bool too_close = false;
-
+/*
           // Find ref_v to use
           for (int i = 0; i < sensor_fusion.size(); ++i) {
             // Car is in ego's lane
@@ -315,7 +333,7 @@ int main() {
               }
             }
           }
-
+*/
           if (too_close) {
             ref_vel -= 0.224;           // -= ~5m/s*s
           }

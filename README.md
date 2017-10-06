@@ -1,9 +1,11 @@
-# CarND-Path-Planning-Project
+# Path Planning for Self-Driving Car
 
 ---
 
 [image1]: ./imgs/img_01.png "case_01"
 [image2]: ./imgs/img_02.png "case_02"
+
+Resulting video with simulation record is available on [YouTube](https://youtu.be/RvxbfHT3odE).
 
 ### Simulator
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab](https://github.com/udacity/self-driving-car-sim/releases).
@@ -38,20 +40,20 @@ Here is the data provided from the Simulator to the C++ Program
 The major task in this project - to evaluate the best trajectory case, that depends on traffic conditions on the road.
 
 Car could be in 3 available states and from each state there are different lane change scenarios:
-- Lane 1 (left lane)
+- **Lane 1** (left lane)
 	- keep lane
 	- turn right
-- Lane 2 (middle lane)
+- **Lane 2** (middle lane)
 	- turn left
 	- keep lane
 	- turn right
-- Lane 3 (right lane)
+- **Lane 3** (right lane)
 	- turn left
 	- keep lane
 
-To make a decision what to do when our car are near to some car in the traffic we need to evaluate the cost of each scenario.
+To make a decision what to do when our car are near to some car in the traffic we need to **evaluate the cost** of each scenario.
 
-Cost evaluation algorithm for each lane consists of following steps:
+**Cost evaluation algorithm** for each lane consists of following steps:
 
 1. Evaluate Lane Cost: if we are going to change the lane the cost is 1000.
 2. Evaluate Speed Cost: higher the speed - lower the cost (speed limit is 49.5 mph).
@@ -61,7 +63,7 @@ Example 1:
 
 ![alt text][image1]
 
-Example 2 (more difficult case): 
+Example 2 (more complicated case): 
 
 ![alt text][image2]
 

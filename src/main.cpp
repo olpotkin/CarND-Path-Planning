@@ -198,6 +198,34 @@ vector<int> getLaneCars(int lane, json sensor_fusion) {
 }
 
 
+// Calculate closest distance
+double getClosestDist(vector<int> cars_ids,
+                      json sensor_fusion,
+                      double check_dist,
+                      double car_s) {
+  double closest_dist = 1.0e+10;
+
+  for (int car_id : cars_ids) {
+    double vx = sensor_fusion[car_id][3];
+    double vy = sensor_fusion[car_id][4];
+    double check_speed = sqrt(vx*vx + vy*vy);
+    double check_start_car_s = sensor_fusion[car_id][5];
+    double check_end_car_s = check_start_car_s + check_dist * check_speed;
+
+    double dist_start = fabs(check_start_car_s - car_s);
+    if (dist_start < closest_dist) {
+      closest_dist = dist_start;
+    }
+
+    double dist_end = fabs(check_end_car_s - car_s);
+    if (dist_end < closest_dist) {
+      closest_dist = dist_end;
+    }
+  }
+  return closest_dist;
+}
+
+
 int main() {
   uWS::Hub h;
 
@@ -400,10 +428,10 @@ int main() {
               double avg_speed = lane_speeds[lane_case];
               cost += getSpeedNormalized(2.0 * (avg_speed - ref_vel/avg_speed)) * 1000;
 
-              // 3.1 Collision cost
-              // 3.2 Inside 10m gap cost
+              // 3.1 Evaluate Collision cost
+              // 3.2 Evaluate Inside 10m gap cost
               double gap = 10;
-
+              vector<int> cars_ids = getLaneCars(lane_case, sensor_fusion);
 
 
 

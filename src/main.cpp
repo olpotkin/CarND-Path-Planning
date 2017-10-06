@@ -172,7 +172,7 @@ double getFrenetLaneCenter(int lane) {
 
 
 // Normalize speed for speed cost evaluation
-double getSpeedNormalized(double x) {
+double getNormalized(double x) {
   return 2.0f / (1.0f + exp(-x)) - 1.0f;
 }
 
@@ -426,25 +426,34 @@ int main() {
 
               // 2. Evaluate Speed Cost
               double avg_speed = lane_speeds[lane_case];
-              cost += getSpeedNormalized(2.0 * (avg_speed - ref_vel/avg_speed)) * 1000;
+              cost += getNormalized(2.0 * (avg_speed - ref_vel/avg_speed)) * 1000;
 
               // 3.1 Evaluate Collision cost
               // 3.2 Evaluate Inside 10m gap cost
               double gap = 10;
               vector<int> cars_ids = getLaneCars(lane_case, sensor_fusion);
+              double closest_dist = getClosestDist(cars_ids, sensor_fusion, 0.02*prev_size, car_s);
 
+              if (closest_dist < gap) {
+                cost += pow(10, 5);
+              }
 
+              cost += getNormalized(2 * gap/closest_dist) * 1000;
 
+              if (cost < best_cost) {
+                best_lane = lane_case;
+                best_cost = cost;
+              }
             }
 
+            // If ego is close to the car and moves faster than the average lane speed
+            if (best_lane == lane && (ref_vel > lane_speeds[lane] || ref_vel > closest_veh_speed)) {
+              ref_vel -= 0.224;         // -= ~5m/s*s
+            }
 
+            // Change lane
+            lane = best_lane;
 
-          }
-
-
-
-          if (too_close) {
-            ref_vel -= 0.224;           // -= ~5m/s*s
           }
           else if (ref_vel < max_vel) {
             ref_vel += 0.224;           // += ~5m/s*s

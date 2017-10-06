@@ -177,6 +177,27 @@ double getSpeedNormalized(double x) {
 }
 
 
+// Get ID's of cars in a given lane
+vector<int> getLaneCars(int lane, json sensor_fusion) {
+  vector<int> cars_ids;
+
+  for (int i = 0; i < sensor_fusion.size(); ++i) {
+    float some_d = sensor_fusion[i][6];
+    int some_lane = getLaneFrenet(some_d);
+
+    // Check for unbounded data
+    if (some_lane < 0 || some_lane > 2) {
+      continue;
+    }
+    // Collect vehicles in ego's lane
+    if (some_lane == lane) {
+      cars_ids.push_back(i);
+    }
+  }
+  return cars_ids;
+}
+
+
 int main() {
   uWS::Hub h;
 
@@ -377,6 +398,12 @@ int main() {
 
               // 2. Evaluate Speed Cost
               double avg_speed = lane_speeds[lane_case];
+              cost += getSpeedNormalized(2.0 * (avg_speed - ref_vel/avg_speed)) * 1000;
+
+              // 3.1 Collision cost
+              // 3.2 Inside 10m gap cost
+              double gap = 10;
+
 
 
 
@@ -387,53 +414,7 @@ int main() {
           }
 
 
-/*
-          // Find ref_v to use
-          for (int i = 0; i < sensor_fusion.size(); ++i) {
-            // Car is in ego's lane
-            float d = sensor_fusion[i][6];
-            if (d < (2 + 4*lane + 2) && d > (2 + 4*lane - 2)) {
-              double vx = sensor_fusion[i][3];
-              double vy = sensor_fusion[i][4];
-              double check_speed = sqrt(vx*vx + vy*vy);
-              double check_car_s = sensor_fusion[i][5];
 
-              check_car_s += ((double)prev_size * 0.02 * check_speed);
-              // Check s values greater than mine and s gap
-              if ((check_car_s > car_s) && ((check_car_s-car_s) < 30)) {
-                // TODO: some logic here
-
-                too_close = true;
-
-                // Left
-                if (lane == 0) {
-                  // Check Right Lane
-                  // - move to Right Lane
-                  // - keep Lane
-                  lane = 1;
-
-                }
-                // Middle
-                else if (lane == 1) {
-                  // Check Left Lane and Right Lane and decide
-                  // what is better:
-                  // - move to Left Lane
-                  // - move to Right Lane
-                  // - keep Lane
-                  lane = 0;
-
-                }
-                // Right
-                else if (lane == 2) {
-                  // - move to Left Lane
-                  // - keep Lane
-                  lane = 1;
-                }
-
-              }
-            }
-          }
-*/
           if (too_close) {
             ref_vel -= 0.224;           // -= ~5m/s*s
           }
@@ -560,7 +541,7 @@ int main() {
             next_x_vals.push_back(x_point);
             next_y_vals.push_back(y_point);
           }
-          // ===========
+
 
           json msgJson;
           msgJson["next_x"] = next_x_vals;

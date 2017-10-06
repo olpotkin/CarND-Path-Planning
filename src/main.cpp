@@ -171,6 +171,12 @@ double getFrenetLaneCenter(int lane) {
 }
 
 
+// Normalize speed for speed cost evaluation
+double getSpeedNormalized(double x) {
+  return 2.0f / (1.0f + exp(-x)) - 1.0f;
+}
+
+
 int main() {
   uWS::Hub h;
 
@@ -359,7 +365,22 @@ int main() {
             int best_lane = lane;
             int best_cost = numeric_limits<double>::max();
 
+            // Check all available lane cases
+            for (int lane_case : lane_cases) {
+              double cost = 0;
 
+              // 1. Evaluate Lane Cost
+              // If lane is not ego's lane
+              if (lane_case != lane) {
+                cost += 1000;
+              }
+
+              // 2. Evaluate Speed Cost
+              double avg_speed = lane_speeds[lane_case];
+
+
+
+            }
 
 
 

@@ -163,6 +163,14 @@ int getLaneFrenet(double d) {
 }
 
 
+// Calculate Frenet Lane center
+double getFrenetLaneCenter(int lane) {
+  int lane_width = 4;
+  double frenet_lane_center = double(lane*lane_width + lane_width/2);
+  return frenet_lane_center;
+}
+
+
 int main() {
   uWS::Hub h;
 
@@ -350,6 +358,9 @@ int main() {
 
             int best_lane = lane;
             int best_cost = numeric_limits<double>::max();
+
+
+
 
 
           }

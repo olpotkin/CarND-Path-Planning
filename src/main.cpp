@@ -203,7 +203,7 @@ double getClosestDist(vector<int> cars_ids,
                       json sensor_fusion,
                       double check_dist,
                       double car_s) {
-  double closest_dist = 1.0e+10;
+  double closest_dist = 100000;
 
   for (int car_id : cars_ids) {
     double vx = sensor_fusion[car_id][3];
@@ -374,6 +374,13 @@ int main() {
             }
             int car_lane = getLaneFrenet(end_path_d);
 
+            /*
+            cout << "car_d: " << end_path_d
+                 << " lane: "<< car_lane
+                 << " some_d: " << some_d
+                 << " some_lane: " << some_lane << endl;
+            */
+
             if (lane == some_lane) {
               double vx = sensor_fusion[i][3];
               double vy = sensor_fusion[i][4];
@@ -411,10 +418,11 @@ int main() {
               lane_cases = {1, 2};
             }
 
-            int best_lane = lane;
-            int best_cost = numeric_limits<double>::max();
+            int best_lane    = lane;
+            double best_cost = numeric_limits<double>::max();
 
             // Check all available lane cases
+            // Analyse cost for each lane and decide what to do
             for (int lane_case : lane_cases) {
               double cost = 0;
 
@@ -429,13 +437,13 @@ int main() {
               cost += getNormalized(2.0 * (avg_speed - ref_vel/avg_speed)) * 1000;
 
               // 3.1 Evaluate Collision cost
-              // 3.2 Evaluate Inside 10m gap cost
-              double gap = 10;
+              // 3.2 Evaluate Inside 15m gap cost
+              double gap = 15;
               vector<int> cars_ids = getLaneCars(lane_case, sensor_fusion);
               double closest_dist = getClosestDist(cars_ids, sensor_fusion, 0.02*prev_size, car_s);
 
               if (closest_dist < gap) {
-                cost += pow(10, 5);
+                cost += 100000;
               }
 
               cost += getNormalized(2 * gap/closest_dist) * 1000;
@@ -444,6 +452,9 @@ int main() {
                 best_lane = lane_case;
                 best_cost = cost;
               }
+              cout << "COST |" << cost
+                   << "|\t BEST_COST |" << best_cost
+                   << "|\t LANE |" << lane_case << "|" << endl;
             }
 
             // If ego is close to the car and moves faster than the average lane speed
@@ -452,6 +463,8 @@ int main() {
             }
 
             // Change lane
+            cout << "Change the line from |" << lane << "| to |" << best_lane << "| " << endl;
+            cout << "-------------------------------------------------" << endl;
             lane = best_lane;
 
           }

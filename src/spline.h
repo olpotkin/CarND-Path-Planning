@@ -33,7 +33,7 @@
 #include <algorithm>
 
 
-// unnamed namespace only because the implementation is in this
+// Unnamed namespace only because the implementation is in this
 // header file and we don't want to export symbols to the obj files
 namespace
 {
@@ -41,37 +41,43 @@ namespace
 namespace tk
 {
 
-// band matrix solver
+// Band matrix solver
 class band_matrix
 {
 private:
-    std::vector< std::vector<double> > m_upper;  // upper band
-    std::vector< std::vector<double> > m_lower;  // lower band
+  std::vector< std::vector<double> > m_upper;   // upper band
+  std::vector< std::vector<double> > m_lower;   // lower band
+
 public:
-    band_matrix() {};                             // constructor
-    band_matrix(int dim, int n_u, int n_l);       // constructor
-    ~band_matrix() {};                            // destructor
-    void resize(int dim, int n_u, int n_l);      // init with dim,n_u,n_l
-    int dim() const;                             // matrix dimension
-    int num_upper() const
-    {
-        return m_upper.size()-1;
-    }
-    int num_lower() const
-    {
-        return m_lower.size()-1;
-    }
-    // access operator
-    double & operator () (int i, int j);            // write
-    double   operator () (int i, int j) const;      // read
-    // we can store an additional diogonal (in m_lower)
-    double& saved_diag(int i);
-    double  saved_diag(int i) const;
-    void lu_decompose();
-    std::vector<double> r_solve(const std::vector<double>& b) const;
-    std::vector<double> l_solve(const std::vector<double>& b) const;
-    std::vector<double> lu_solve(const std::vector<double>& b,
-                                 bool is_lu_decomposed=false);
+  band_matrix() {};                             // constructor
+
+  band_matrix(int dim, int n_u, int n_l);       // constructor
+
+  ~band_matrix() {};                            // destructor
+
+  void resize(int dim, int n_u, int n_l);       // init with dim, n_u, n_l
+
+  int dim() const;                              // matrix dimension
+
+  int num_upper() const {
+    return m_upper.size()-1;
+  }
+  
+  int num_lower() const {
+    return m_lower.size()-1;
+  }
+
+  // Access operator
+  double& operator () (int i, int j);            // write
+  double  operator () (int i, int j) const;      // read
+
+  // we can store an additional diogonal (in m_lower)
+  double& saved_diag(int i);
+  double  saved_diag(int i) const;
+  void    lu_decompose();
+  std::vector<double> r_solve(const std::vector<double>& b) const;
+  std::vector<double> l_solve(const std::vector<double>& b) const;
+  std::vector<double> lu_solve(const std::vector<double>& b, bool is_lu_decomposed=false);
 
 };
 
@@ -80,20 +86,21 @@ public:
 class spline
 {
 public:
-    enum bd_type {
-        first_deriv = 1,
-        second_deriv = 2
-    };
+  enum bd_type {
+    first_deriv = 1,
+    second_deriv = 2
+  };
 
 private:
-    std::vector<double> m_x,m_y;            // x,y coordinates of points
-    // interpolation parameters
-    // f(x) = a*(x-x_i)^3 + b*(x-x_i)^2 + c*(x-x_i) + y_i
-    std::vector<double> m_a,m_b,m_c;        // spline coefficients
-    double  m_b0, m_c0;                     // for left extrapol
-    bd_type m_left, m_right;
-    double  m_left_value, m_right_value;
-    bool    m_force_linear_extrapolation;
+  std::vector<double> m_x,m_y;            // x,y coordinates of points
+  // interpolation parameters
+  // f(x) = a*(x-x_i)^3 + b*(x-x_i)^2 + c*(x-x_i) + y_i
+  std::vector<double> m_a,m_b,m_c;        // spline coefficients
+  double  m_b0, m_c0;                     // for left extrapol
+  bd_type m_left, m_right;
+  double  m_left_value;
+  double  m_right_value;
+  bool    m_force_linear_extrapolation;
 
 public:
     // set default boundary condition to be zero curvature at both ends
@@ -114,11 +121,9 @@ public:
 };
 
 
-
 // ---------------------------------------------------------------------
 // implementation part, which could be separated into a cpp file
 // ---------------------------------------------------------------------
-
 
 // band_matrix implementation
 // -------------------------
@@ -372,33 +377,32 @@ void spline::set_points(const std::vector<double>& x,
         m_b[n-1]=0.0;
 }
 
-double spline::operator() (double x) const
-{
-    size_t n=m_x.size();
-    // find the closest point m_x[idx] < x, idx=0 even if x<m_x[0]
-    std::vector<double>::const_iterator it;
-    it=std::lower_bound(m_x.begin(),m_x.end(),x);
-    int idx=std::max( int(it-m_x.begin())-1, 0);
+double spline::operator() (double x) const {
+  size_t n=m_x.size();
+  // find the closest point m_x[idx] < x, idx=0 even if x<m_x[0]
+  std::vector<double>::const_iterator it;
+  it  =std::lower_bound(m_x.begin(),m_x.end(),x);
+  int idx = std::max( int(it-m_x.begin())-1, 0);
 
-    double h=x-m_x[idx];
-    double interpol;
-    if(x<m_x[0]) {
-        // extrapolation to the left
-        interpol=(m_b0*h + m_c0)*h + m_y[0];
-    } else if(x>m_x[n-1]) {
-        // extrapolation to the right
-        interpol=(m_b[n-1]*h + m_c[n-1])*h + m_y[n-1];
-    } else {
-        // interpolation
-        interpol=((m_a[idx]*h + m_b[idx])*h + m_c[idx])*h + m_y[idx];
-    }
-    return interpol;
+  double h = x - m_x[idx];
+  double interpol;
+  if (x < m_x[0]) {
+    // extrapolation to the left
+    interpol=(m_b0*h + m_c0)*h + m_y[0];
+  }
+  else if (x > m_x[n-1]) {
+    // extrapolation to the right
+    interpol = (m_b[n-1]*h + m_c[n-1])*h + m_y[n-1];
+  }
+  else {
+    // interpolation
+    interpol=((m_a[idx]*h + m_b[idx])*h + m_c[idx])*h + m_y[idx];
+  }
+
+  return interpol;
 }
 
-
 } // namespace tk
-
-
 } // namespace
 
-#endif /* TK_SPLINE_H */
+#endif // TK_SPLINE_H

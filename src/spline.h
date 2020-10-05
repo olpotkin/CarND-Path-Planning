@@ -236,34 +236,39 @@ void band_matrix::lu_decompose() {
 }
 
 // solves Ly=b
-std::vector<double> band_matrix::l_solve(const std::vector<double>& b) const
-{
-    assert( this->dim()==(int)b.size() );
-    std::vector<double> x(this->dim());
-    int j_start;
-    double sum;
-    for(int i=0; i<this->dim(); i++) {
-        sum=0;
-        j_start=std::max(0,i-this->num_lower());
-        for(int j=j_start; j<i; j++) sum += this->operator()(i,j)*x[j];
-        x[i]=(b[i]*this->saved_diag(i)) - sum;
+std::vector<double> band_matrix::l_solve(const std::vector<double>& b) const {
+  assert( this->dim()==(int)b.size() );
+  std::vector<double> x(this->dim());
+  int j_start;
+  double sum;
+
+  for (int i=0; i<this->dim(); i++) {
+    sum = 0;
+    j_start=std::max(0,i-this->num_lower());
+    for(int j=j_start; j<i; j++) sum += this->operator()(i,j)*x[j];
+      x[i] = (b[i]*this->saved_diag(i)) - sum;
     }
-    return x;
+  return x;
 }
+
 // solves Rx=y
-std::vector<double> band_matrix::r_solve(const std::vector<double>& b) const
-{
-    assert( this->dim()==(int)b.size() );
-    std::vector<double> x(this->dim());
-    int j_stop;
-    double sum;
-    for(int i=this->dim()-1; i>=0; i--) {
-        sum=0;
-        j_stop=std::min(this->dim()-1,i+this->num_upper());
-        for(int j=i+1; j<=j_stop; j++) sum += this->operator()(i,j)*x[j];
-        x[i]=( b[i] - sum ) / this->operator()(i,i);
+std::vector<double> band_matrix::r_solve(const std::vector<double>& b) const {
+  assert( this->dim()==(int)b.size() );
+  std::vector<double> x(this->dim());
+  int j_stop;
+  double sum;
+
+  for (int i=this->dim()-1; i>=0; i--) {
+    sum=0;
+    j_stop=std::min(this->dim()-1,i+this->num_upper());
+
+    for (int j=i+1; j<=j_stop; j++) {
+      sum += this->operator()(i,j)*x[j];
     }
-    return x;
+
+    x[i]=( b[i] - sum ) / this->operator()(i,i);
+  }
+  return x;
 }
 
 std::vector<double> band_matrix::lu_solve(const std::vector<double>& b,
@@ -280,23 +285,24 @@ std::vector<double> band_matrix::lu_solve(const std::vector<double>& b,
 }
 
 
-
-
 // spline implementation
 // -----------------------
 
-void spline::set_boundary(spline::bd_type left, double left_value,
-                          spline::bd_type right, double right_value,
-                          bool force_linear_extrapolation)
+void spline::set_boundary(
+  spline::bd_type left,
+  double left_value,
+  spline::bd_type right,
+  double right_value,
+  bool force_linear_extrapolation)
 {
-    assert(m_x.size()==0);          // set_points() must not have happened yet
-    m_left=left;
-    m_right=right;
-    m_left_value=left_value;
-    m_right_value=right_value;
-    m_force_linear_extrapolation=force_linear_extrapolation;
-}
+  assert(m_x.size()==0);          // set_points() must not have happened yet
 
+  m_left                       = left;
+  m_right                      = right;
+  m_left_value                 = left_value;
+  m_right_value                = right_value;
+  m_force_linear_extrapolation = force_linear_extrapolation;
+}
 
 void spline::set_points(const std::vector<double>& x,
                         const std::vector<double>& y, bool cubic_spline)

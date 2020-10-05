@@ -128,35 +128,38 @@ public:
 // band_matrix implementation
 // -------------------------
 
-band_matrix::band_matrix(int dim, int n_u, int n_l)
-{
-    resize(dim, n_u, n_l);
+band_matrix::band_matrix(int dim, int n_u, int n_l) {
+  resize(dim, n_u, n_l);
 }
-void band_matrix::resize(int dim, int n_u, int n_l)
-{
-    assert(dim>0);
-    assert(n_u>=0);
-    assert(n_l>=0);
-    m_upper.resize(n_u+1);
-    m_lower.resize(n_l+1);
-    for(size_t i=0; i<m_upper.size(); i++) {
-        m_upper[i].resize(dim);
-    }
-    for(size_t i=0; i<m_lower.size(); i++) {
-        m_lower[i].resize(dim);
-    }
+
+void band_matrix::resize(int dim, int n_u, int n_l) {
+  assert(dim > 0);
+  assert(n_u >= 0);
+  assert(n_l >= 0);
+
+  m_upper.resize(n_u+1);
+  m_lower.resize(n_l+1);
+
+  for (size_t i=0; i<m_upper.size(); i++) {
+    m_upper[i].resize(dim);
+  }
+  
+  for (size_t i=0; i<m_lower.size(); i++) {
+    m_lower[i].resize(dim);
+  }
 }
-int band_matrix::dim() const
-{
-    if(m_upper.size()>0) {
-        return m_upper[0].size();
-    } else {
-        return 0;
-    }
+
+int band_matrix::dim() const {
+  if (m_upper.size()>0) {
+    return m_upper[0].size();
+  }
+  else {
+    return 0;
+  }
 }
 
 
-// defines the new operator (), so that we can access the elements
+// Defines the new operator (), so that we can access the elements
 // by A(i,j), index going from i=0,...,dim()-1
 double & band_matrix::operator () (int i, int j)
 {

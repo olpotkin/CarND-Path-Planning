@@ -161,71 +161,80 @@ int band_matrix::dim() const {
 
 // Defines the new operator (), so that we can access the elements
 // by A(i,j), index going from i=0,...,dim()-1
-double & band_matrix::operator () (int i, int j)
-{
-    int k=j-i;       // what band is the entry
-    assert( (i>=0) && (i<dim()) && (j>=0) && (j<dim()) );
-    assert( (-num_lower()<=k) && (k<=num_upper()) );
-    // k=0 -> diogonal, k<0 lower left part, k>0 upper right part
-    if(k>=0)   return m_upper[k][i];
-    else	    return m_lower[-k][i];
+double& band_matrix::operator() (int i, int j) {
+  int k = j-i;       // what band is the entry
+  
+  assert( (i>=0) && (i<dim()) && (j>=0) && (j<dim()) );
+  assert( (-num_lower()<=k) && (k<=num_upper()) );
+
+  // k=0 -> diogonal, k<0 lower left part, k>0 upper right part
+  if (k >= 0) return m_upper[k][i];
+  else        return m_lower[-k][i];
 }
-double band_matrix::operator () (int i, int j) const
-{
-    int k=j-i;       // what band is the entry
-    assert( (i>=0) && (i<dim()) && (j>=0) && (j<dim()) );
-    assert( (-num_lower()<=k) && (k<=num_upper()) );
-    // k=0 -> diogonal, k<0 lower left part, k>0 upper right part
-    if(k>=0)   return m_upper[k][i];
-    else	    return m_lower[-k][i];
+
+double band_matrix::operator() (int i, int j) const {
+  int k = j-i;       // what band is the entry
+  
+  assert( (i>=0) && (i<dim()) && (j>=0) && (j<dim()) );
+  assert( (-num_lower()<=k) && (k<=num_upper()) );
+  
+  // k=0 -> diogonal, k<0 lower left part, k>0 upper right part
+  if (k >= 0) return m_upper[k][i];
+  else	      return m_lower[-k][i];
 }
+
 // second diag (used in LU decomposition), saved in m_lower
-double band_matrix::saved_diag(int i) const
-{
-    assert( (i>=0) && (i<dim()) );
-    return m_lower[0][i];
+double band_matrix::saved_diag(int i) const {
+  assert( (i>=0) && (i<dim()) );
+  return m_lower[0][i];
 }
-double & band_matrix::saved_diag(int i)
-{
-    assert( (i>=0) && (i<dim()) );
-    return m_lower[0][i];
+
+double& band_matrix::saved_diag(int i) {
+  assert( (i>=0) && (i<dim()) );
+  return m_lower[0][i];
 }
 
 // LR-Decomposition of a band matrix
-void band_matrix::lu_decompose()
-{
-    int  i_max,j_max;
-    int  j_min;
-    double x;
+void band_matrix::lu_decompose() {
+  int i_max;
+  int j_max;
+  int j_min;
+  double x;
 
-    // preconditioning
-    // normalize column i so that a_ii=1
-    for(int i=0; i<this->dim(); i++) {
-        assert(this->operator()(i,i)!=0.0);
-        this->saved_diag(i)=1.0/this->operator()(i,i);
-        j_min=std::max(0,i-this->num_lower());
-        j_max=std::min(this->dim()-1,i+this->num_upper());
-        for(int j=j_min; j<=j_max; j++) {
-            this->operator()(i,j) *= this->saved_diag(i);
-        }
-        this->operator()(i,i)=1.0;          // prevents rounding errors
+  // preconditioning
+  // normalize column i so that a_ii=1
+  for (int i=0; i<this->dim(); i++) {
+    assert(this->operator()(i,i)!=0.0);
+    this->saved_diag(i) = 1.0/this->operator()(i,i);
+
+    j_min = std::max(0,i-this->num_lower());
+    j_max = std::min(this->dim()-1,i+this->num_upper());
+
+    for (int j=j_min; j<=j_max; j++) {
+      this->operator()(i,j) *= this->saved_diag(i);
     }
 
-    // Gauss LR-Decomposition
-    for(int k=0; k<this->dim(); k++) {
-        i_max=std::min(this->dim()-1,k+this->num_lower());  // num_lower not a mistake!
-        for(int i=k+1; i<=i_max; i++) {
-            assert(this->operator()(k,k)!=0.0);
-            x=-this->operator()(i,k)/this->operator()(k,k);
-            this->operator()(i,k)=-x;                         // assembly part of L
-            j_max=std::min(this->dim()-1,k+this->num_upper());
-            for(int j=k+1; j<=j_max; j++) {
-                // assembly part of R
-                this->operator()(i,j)=this->operator()(i,j)+x*this->operator()(k,j);
-            }
-        }
+    this->operator()(i,i) = 1.0; // prevents rounding errors
+  }
+
+  // Gauss LR-Decomposition
+  for (int k = 0; k < this->dim(); k++) {
+    i_max=std::min(this->dim()-1,k+this->num_lower());  // num_lower not a mistake!
+
+    for (int i = k+1; i <= i_max; i++) {
+      assert(this->operator()(k,k)!=0.0);
+      x=-this->operator()(i,k)/this->operator()(k,k);
+      this->operator()(i,k)=-x;                         // assembly part of L
+      j_max=std::min(this->dim()-1,k+this->num_upper());
+
+      for (int j = k+1; j <= j_max; j++) {
+        // assembly part of R
+        this->operator()(i,j)=this->operator()(i,j)+x*this->operator()(k,j);
+      }
     }
+  }
 }
+
 // solves Ly=b
 std::vector<double> band_matrix::l_solve(const std::vector<double>& b) const
 {
